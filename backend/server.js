@@ -42,6 +42,32 @@ app.post('/addNote', async (req, res) => {
     }
 });
 
+app.get('/getNotes', async (req, res) => {
+    try {
+       const notes = await Note.find();
+       res.json(notes);
+    } catch (err) {
+       res.status(500).send(err);
+    }
+ });
+
+
+ app.get('/getNote/:id', async (req, res) => {
+    try {
+       const id = req.params.id
+       console.log(req);
+       
+       const note = await Note.findById(id);
+       if (note) {
+          res.json(note);
+       } else {
+          res.status(404).send('Note not found');
+       }
+    } catch (err) {
+       res.status(500).send(err);
+    }
+ });
+
   
 
 
@@ -58,3 +84,45 @@ app.listen(PORT,()=>{
     console.log(`Server is up and running at port ${3000}`)
    
 })
+
+app.put('/updateNote/:id', async (req, res) => {
+    try {
+       const note = await Note.findByIdAndUpdate(
+          req.params.id,
+          { note_title: req.body.note_title },
+          { new: true }
+       );
+       if (note) {
+          res.json(note);
+       } else {
+          res.status(404).send('Note not found');
+       }
+    } catch (err) {
+       res.status(500).send(err);
+    }
+ });
+ 
+
+app.delete('/deleteNotes/:id', async (req, res) => {
+    try {
+       const note = await Note.findByIdAndDelete(req.params.id);
+       if (note) {
+          res.send('Note deleted');
+       } else {
+          res.status(404).send('Note not found');
+       }
+    } catch (err) {
+       res.status(500).send(err);
+    }
+ });
+
+
+ app.get('/search', async (req, res) => {
+   try {
+      const title = req.query.title;
+      const notes = await Note.find({ note_title: new RegExp(title, 'i') });
+      res.json(notes);
+   } catch (err) {
+      res.status(500).send(err);
+   }
+ });
